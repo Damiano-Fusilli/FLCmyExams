@@ -48,7 +48,5 @@ non terminal header ;
 
 start with prog;
 
-prog ::= header
-
-tok
+prog ::= 
 ;
