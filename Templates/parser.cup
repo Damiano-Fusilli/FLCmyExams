@@ -16,22 +16,31 @@ parser code {:
 :};
 
 
-/////////////////////////////
-//// Symbols Delaration
-////////////////////////////
+terminal SEP, TOK1, TOK2, TOK3, SEP, WS, EQ, PLUS, MINUS, STAR, DIV, RO, RC, BO, BC, CO, CC;
+terminal String ID;
+terminal Integer UINT;
 
-terminal SEP;
-// terminal String test;
-// terminal Double test;
-// terminal Integer test;
+//terminal Float FLOAT;
+//terminal Double DOUBLE;
+
 
 non terminal prog;
+non terminal header ;
 // non terminal String ;
 // non terminal HashMap ;
 // non terminal Integer ;
 // non terminal Double;
+// non terminal Boolean ;
 
-// precedence left ;
+
+//precedences and associativities
+// precedence left OR;
+// precedence left AND;
+// precedence left NOT;
+// precedence left LT, GT, LE, GE, EQ, NEQ;
+// precedence left PLUS, MINUS;
+// precedence left STAR, DIV;
+
 
 /////////////////////////////
 //// Grammar
@@ -39,5 +48,7 @@ non terminal prog;
 
 start with prog;
 
-prog ::= 
+prog ::= header
+
+tok
 ;
