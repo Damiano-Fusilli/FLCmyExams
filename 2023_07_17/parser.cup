@@ -1,0 +1,129 @@
+import java_cup.runtime.*;
+import java.util.*;
+import java.io.*;
+
+
+init with{:
+    table = new HashMap <String, HashMap <String, Float>>();
+:};
+
+parser code {:
+    public HashMap <String, HashMap <String, Float>> table;
+
+    public Object stack(int position){
+        return (((Symbol)stack.elementAt(tos + position)).value);
+    }
+:};
+
+
+terminal SEP, TOK1, TOK2, TOK3, PERC, CM, MINUS, SC;
+terminal String QSTRING, EURO;
+terminal Float PRICE;
+terminal Integer UINT;
+
+//terminal Float FLOAT;
+//terminal Double DOUBLE;
+
+
+non terminal prog,header, tok1_list, tok2_list, tok1_3_list;
+non terminal dresses, dress_list, dress;
+non terminal shopping, purchase;
+
+non terminal Object[] purch_prod;
+non terminal HashMap prod_list;
+non terminal Integer NT1, NT3;
+non terminal String NT0, NT2;
+// non terminal String ;
+// non terminal HashMap ;
+// non terminal Integer ;
+// non terminal Double;
+// non terminal Boolean ;
+
+
+//precedences and associativities
+// precedence left OR;
+// precedence left AND;
+// precedence left NOT;
+// precedence left LT, GT, LE, GE, EQ, NEQ;
+// precedence left PLUS, MINUS;
+// precedence left STAR, DIV;
+
+
+/////////////////////////////
+//// Grammar
+////////////////////////////
+
+start with prog;
+
+prog ::= header SEP dresses SEP  shopping
+;
+
+header ::= tok1_list tok2_list | TOK2 SC tok1_3_list |TOK2 SC tok1_3_list TOK2 SC tok1_3_list
+;
+
+tok1_list ::= TOK1 SC TOK1 SC TOK1 | tok1_list TOK1 SC TOK1 SC 
+;
+
+tok2_list ::= TOK2 SC TOK2 SC TOK2 SC | 
+    TOK2 SC TOK2 SC TOK2 SC TOK2 SC TOK2 SC TOK2 SC TOK2 SC TOK2 SC TOK2 SC |
+    TOK2 SC TOK2 SC TOK2 SC TOK2 SC TOK2 SC TOK2 SC TOK2 SC TOK2 SC TOK2 SC TOK2 SC
+;
+
+tok1_3_list ::= tok1_3_list TOK1 SC | tok1_3_list TOK3 SC | 
+;
+
+
+dresses ::= dress dress dress | dresses dress dress
+;
+
+
+dress ::= QSTRING:s MINUS prod_list:tab SC {:
+        parser.table.put(s, tab);
+    :}
+;
+
+prod_list ::= UINT QSTRING:name PRICE:p EURO {:
+        RESULT = new HashMap <String, Float> ();
+        RESULT.put(name, p);
+    :} | prod_list:tab CM UINT:id QSTRING:name PRICE:p EURO  {:
+        tab.put(name, p);
+        RESULT = tab;
+    :}
+;
+
+shopping ::= purchase SC | shopping purchase SC
+;
+
+purchase ::= QSTRING:dress_name UINT:percent PERC MINUS purch_prod:pair {:
+        System.out.println("TOTAL: " + pair[0] + " euro N_PROD: "+pair[1]);
+    :}
+;
+
+purch_prod ::= NT0:dress_name NT1:percent QSTRING:prod_name UINT:quantity {: 
+        System.out.println(dress_name); 
+        Float prod_cost = (Float) ((HashMap)parser.table.get(dress_name)).get(prod_name);
+        Float total = prod_cost * quantity * percent /100;
+        System.out.println(prod_name + " " + total); 
+        RESULT = new Object[2];
+        RESULT[0] = total;
+        RESULT[1] = quantity;
+    :}
+    | purch_prod:pair NT2:dress_name NT3:percent CM QSTRING:prod_name UINT:quantity {:
+        Float prod_cost = (Float) ((HashMap)parser.table.get(dress_name)).get(prod_name);
+        Float total = prod_cost * quantity * percent /100;
+        System.out.println(prod_name + " " + total); 
+        Float sum = (Float)pair[0] + total;
+        Integer n_prod = (Integer)pair[1] + quantity;
+        RESULT = new Object[2];
+        RESULT[0] = sum;
+        RESULT[1] = n_prod; :}
+;
+
+NT0 ::= {: RESULT = (String) parser.stack(-3); :}
+;
+NT1 ::= {: RESULT = (Integer) parser.stack(-3); :}
+;
+NT2 ::= {: RESULT = (String) parser.stack(-4); :}
+;
+NT3 ::= {: RESULT = (Integer) parser.stack(-4); :}
+;
