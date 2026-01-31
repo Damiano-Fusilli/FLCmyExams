@@ -16,9 +16,10 @@ parser code {:
 :};
 
 
-terminal SEP, TOK1, TOK2, TOK3, SEP, WS, EQ, PLUS, MINUS, STAR, DIV, RO, RC, BO, BC, CO, CC;
-terminal String ID;
+terminal SEP, TOK1, TOK2, TOK3;
+terminal String QSTRING;
 terminal Integer UINT;
+
 
 //terminal Float FLOAT;
 //terminal Double DOUBLE;
@@ -26,6 +27,7 @@ terminal Integer UINT;
 
 non terminal prog;
 non terminal header ;
+non terminal Integer NT0;
 // non terminal String ;
 // non terminal HashMap ;
 // non terminal Integer ;

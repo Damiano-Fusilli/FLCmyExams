@@ -28,12 +28,26 @@ hexnum = [0-9a-fA-F]
 float = ("+"|"-")? ((0\.[0-9]*) | [1-9][0-9]*\.[0-9]* | [1-9][0-9]*)
 double = ([0-9]+\.[0-9]* | ([0-9]*\.[0-9]+)) ([e|E] ("+"|"-")? [0-9]+)?
 qstring = \" ~ \"
+
+
 ipnum = [0-9] | [1-9][0-9] | 1[0-9]{2} | 2[0-4][0-9] | 25[0-5]
 ip = {ipnum} "." {ipnum} "." {ipnum} "." {ipnum}
-day = "0"[1-9] | [12][0-9] | "3"[01]
-month = "0"[1-9] | "1"[0-2]
-year = [0-9]{4}
-date = {day} "/" {month} "/" {year}
+
+
+january = "01-" ("0"[1-9] | [12][0-9] | "3"[01])
+february = "02-" ("0"[1-9] | "1"[0-9] | "2"[0-8])
+february_leap = "02-" ("0"[1-9] | [12][0-9]) 
+march = "03-" ("0"[1-9] | [12][0-9] | "3"[0-1])
+april = "04-" ("0"[1-9] | [12][0-9] | "3"[0])
+may = "05-" ("0"[1-9] | [12][0-9] | "3"[0-1])
+june = "06-" ("0"[1-9] | [12][0-9] | "3"[0])
+july = "07-" ("0"[1-9] | [12][0-9] | "3"[0-1])
+august = "08-" ("0"[1-9] | [12][0-9] | "3"[0-1])
+september = "09-" ("0"[1-9] | [12][0-9] | "3"[0])0)
+october = "10-" ("0"[1-9] | [12][0-9] | "3"[0-1])
+november = "11-" ("0"[1-9] | [12][0-9] | "3"[0])
+december = "12-" ("0"[1-9] | [12][0-9] | "3"[0-1])
+
 */
 
 sep = 
@@ -44,11 +58,15 @@ tok2 =
 
 tok3 =
 
+uint = 0 | [1-9][0-9]*
+
+qstring = \" ~ \"
+
 comment = "<*" ~ "*>"
 
 //comment = "/*" ~  "*/"
-//comment = "//" ~ 
-//comment = "#" ~ 
+//comment = "//" ~ {nl}
+//comment = "#" ~ {nl}
 
 %%
 
@@ -57,7 +75,7 @@ comment = "<*" ~ "*>"
 
 // "."             {return sym(sym.DOT);}
 // ":"             {return sym(sym.CO);}
-// ","             {return sym(sym.CM);}
+// ","             {return sym(sym.COMMA);}
 // ";"             {return sym(sym.SC);}
 
 // "("             {return sym(sym.RO);}
@@ -78,9 +96,9 @@ comment = "<*" ~ "*>"
 
 
 // "&"             {return sym(sym.AND);}
-// "|"             {return sym(sym.PIPE);}
-// "&&"            {return sym(sym.AND);}
-// "||"            {return sym(sym.OR);}
+// "|"             {return sym(sym.OR);}
+// "&&"            {return sym(sym.ANDAND);}
+// "||"            {return sym(sym.OROR);}
 
 // "%"             {return sym(sym.PERC);}
 // "?"             {return sym(sym.QUM);}
@@ -95,13 +113,12 @@ comment = "<*" ~ "*>"
 // "<"             {return sym(sym.LT);}
 // ">="            {return sym(sym.GTE);}
 // "<="            {return sym(sym.LTE);}
-// \\              {return sym(sym.BSL);}
+// "\\"          {return sym(sym.BSL);}
 
 // \'              {return sym(sym.QU);}
 // \"              {return sym(sym.DQU);}
 // \`              {return sym(sym.GRAVE);}
 // "~"             {return sym(sym.TIL);}
-// "|"             {return sym(sym.PIPE);}
 // "_"             {return sym(sym.US);}
 
 
@@ -122,7 +139,13 @@ comment = "<*" ~ "*>"
 //{id}              {return sym(sym.ID, yytext());}
 
 
-{sep}            {return sym(sym.SEP);}
+{sep}           {return sym(sym.SEP);}
+{tok1}          {return sym(sym.TOK1);}
+{tok2}          {return sym(sym.TOK2);}
+{tok3}          {return sym(sym.TOK3);}
+
+{qstring}          {return sym(sym.QSTRING, new String(yytext()));}
+{uint}             {return sym(sym.UINT, new Integer(yytext()));}
 
 {comment}          {;}
 
