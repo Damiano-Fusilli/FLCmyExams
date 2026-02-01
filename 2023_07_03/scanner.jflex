@@ -33,7 +33,6 @@ qstring = \" ~ \"
 ipnum = [0-9] | [1-9][0-9] | 1[0-9]{2} | 2[0-4][0-9] | 25[0-5]
 ip = {ipnum} "." {ipnum} "." {ipnum} "." {ipnum}
 
-
 january = ("0"[1-9] | [12][0-9] | "3"[01])
 february = ("0"[1-9] | "1"[0-9] | "2"[0-8])
 february_leap = ("0"[1-9] | [12][0-9]) 
@@ -50,19 +49,35 @@ december = ("0"[1-9] | [12][0-9] | "3"[0-1])
 
 */
 
-sep = 
+sep = "$$$" "$$"* 
 
-tok1 =
+tok1 = {exclamation} ({even} | {question})
 
-tok2 =
+exclamation = "!!!!" "!!"*
+even = -1[02468] | "-"[2468] | [02468] | [1-9][02468] | 1[0-9][02468] | 2[0-8][0246]
+question = "?????" "??"*
 
-tok3 =
+tok2 = ("2023"("/07/"{july} | "/08/"{august} | "/09/"{september} | "/10/"{october} )) |
+    ({july}"/07/2023" | {august}"/08/2023" | {september}"/09/2023" | {october}"/10/2023" )
+
+july = ("0"[2-9] | [12][0-9] | "3"[0-1])
+august = ("0"[1-9] | [12][0-9] | "3"[0-1])
+september = ("0"[1-9] | [12][0-9] | "3"[0])
+october = ("0"[1-6])
+
+tok3 = {hour} ":" {minute} (":" {second})? | 
+    "07:"(3[7-9] | [45][0-9])(":" ("19"|[2-5][0-9]))? |
+    "22:"(39 | [4-5][0-9])(":"(2[3-9] | [3-5][0-9]))?
+
+hour = "0"[89] | "1"[0-9] | "2"[01]
+minute = [0-5][0-9]
+second = [0-5][0-9]
 
 uint = 0 | [1-9][0-9]*
 
 qstring = \" ~ \"
 
-comment = "<*" ~ "*>"
+comment = "<*" .*  "*>"
 
 //comment = "/*" ~  "*/"
 //comment = "//" ~ {nl}
@@ -144,8 +159,25 @@ comment = "<*" ~ "*>"
 {tok2}          {return sym(sym.TOK2);}
 {tok3}          {return sym(sym.TOK3);}
 
+"house"            {return sym(sym.HOUSE);}
+"start"            {return sym(sym.START);}
+"end"              {return sym(sym.END);}
+"if"               {return sym(sym.IF);}
+","                {return sym(sym.COMMA);}
+"."                {return sym(sym.DOT);}
+"=="               {return sym(sym.EQ);}
+"and"              {return sym(sym.AND);}
+"or"               {return sym(sym.OR);}
+"not"              {return sym(sym.NOT);}
+"then"             {return sym(sym.THEN);}
+"print"            {return sym(sym.PRINT);}
+"fi"               {return sym(sym.FI);}
 {qstring}          {return sym(sym.QSTRING, new String(yytext()));}
 {uint}             {return sym(sym.UINT, new Integer(yytext()));}
+
+";"             {return sym(sym.SC);}
+"("             {return sym(sym.RO);}
+")"             {return sym(sym.RC);}
 
 {comment}          {;}
 

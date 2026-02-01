@@ -44,3 +44,6 @@ replay_pid*
 # OS files
 .DS_Store
 Thumbs.db
+
+# Setup scripts
+setup_java24.bat

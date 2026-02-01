@@ -1,0 +1,114 @@
+import java_cup.runtime.*;
+import java.util.*;
+import java.io.*;
+
+
+init with{:
+    table = new HashMap <String, HashMap <String, Integer>>();
+:};
+
+parser code {:
+    public HashMap <String, HashMap <String, Integer>> table;
+
+    public Object stack(int position){
+        return (((Symbol)stack.elementAt(tos + position)).value);
+    }
+:};
+
+
+terminal SEP, TOK1, TOK2, TOK3, SC, RO,RC, HOUSE, START, END, IF, COMMA, DOT, AND, OR, THEN, NOT, PRINT, FI, EQ;
+terminal String QSTRING;
+terminal Integer UINT;
+
+
+//terminal Float FLOAT;
+//terminal Double DOUBLE;
+
+
+non terminal prog;
+non terminal header, tok3_list;
+non terminal houses, house;
+non terminal preferences, if_commands;
+non terminal HashMap <String, Integer> room_list;
+non terminal Boolean NT0, bool_exp, print_list;
+// non terminal String ;
+// non terminal HashMap ;
+// non terminal Integer ;
+// non terminal Double;
+// non terminal Boolean ;
+
+
+//precedences and associativities
+precedence left OR;
+precedence left AND;
+precedence left NOT;
+// precedence left LT, GT, LE, GE, EQ, NEQ;
+// precedence left PLUS, MINUS;
+// precedence left STAR, DIV;
+
+
+/////////////////////////////
+//// Grammar
+////////////////////////////
+
+start with prog;
+
+prog ::= header SEP houses SEP preferences
+;
+
+header::= tok3_list TOK1 SC tok3_list TOK2 SC tok3_list |
+    tok3_list TOK2 SC tok3_list TOK1 SC tok3_list
+;
+
+tok3_list ::= tok3_list TOK3 SC | 
+;
+
+houses ::= houses house | house
+;
+
+house ::= HOUSE QSTRING:house_name START room_list:tab END{:
+        parser.table.put(house_name, tab);
+  :}
+;
+
+room_list ::= QSTRING:room_name UINT:area {:
+    RESULT = new HashMap <String, Integer>();
+    RESULT.put(room_name,area);
+  :}| room_list:tab COMMA QSTRING:room_name UINT:area{:
+    tab.put(room_name, area);
+    RESULT = tab;
+  :}
+;
+
+preferences::= preferences if_commands | 
+;
+
+if_commands ::= IF bool_exp:condition THEN print_list FI
+;
+
+bool_exp ::= bool_exp:x AND bool_exp:y {: RESULT = x && y; :} |
+              bool_exp:x OR bool_exp:y  {: RESULT = x || y; :} |
+              NOT RO bool_exp:x RC       {: RESULT = !x; :} |
+              RO bool_exp:x RC          {: RESULT = x; :} |
+              QSTRING:house_name DOT QSTRING:room_name EQ UINT:area {:
+                  HashMap <String, Integer> house = parser.table.get(house_name);
+                  Integer room_area = (Integer) house.get(room_name);
+                  if (room_area.equals(area))
+                      RESULT = true;
+                  else
+                      RESULT = false;
+              :}
+;
+
+print_list ::= NT0:bool PRINT QSTRING:to_print SC {:
+    if(bool)
+        System.out.println(to_print);
+      RESULT = bool;
+  :} | print_list:bool PRINT QSTRING:to_print SC {:
+    if(bool)
+        System.out.println(to_print);
+      RESULT = bool;
+  :}
+;
+
+NT0 ::= {: RESULT = (Boolean) parser.stack(-1);  :};
