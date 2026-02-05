@@ -55,20 +55,10 @@ prog ::=
 
 // HANDLE IF CONDITIONS, REMEMBER PRECEDENCES
 /*
-if_commands ::= IF bool_exp:condition THEN print_list FI
-;
-
-bool_exp ::= bool_exp:x AND bool_exp:y {: RESULT = x && y; :} |
-              bool_exp:x OR bool_exp:y  {: RESULT = x || y; :} |
-              NOT RO bool_exp:x RC       {: RESULT = !x; :} |
-              RO bool_exp:x RC          {: RESULT = x; :} |
-              QSTRING:house_name DOT QSTRING:room_name EQ UINT:area {:
-                  HashMap <String, Integer> house = parser.table.get(house_name);
-                  Integer room_area = (Integer) house.get(room_name);
-                  if (room_area.equals(area))
-                      RESULT = true;
-                  else
-                      RESULT = false;
-              :}
-;
+bool_exp ::= TRUE {: RESULT = true; :} | FALSE {: RESULT = false; :} |
+            bool_exp:x AND bool_exp:y {: RESULT = x && y; :} |
+            bool_exp:x OR bool_exp:y  {: RESULT = x || y; :} |
+            NOT bool_exp:x     {: RESULT = !x; :} |
+            RO bool_exp:x RC {:RESULT = x; :} |
+            VAR:key {:RESULT = new Boolean(parser.table.get(key)); :}
 */
