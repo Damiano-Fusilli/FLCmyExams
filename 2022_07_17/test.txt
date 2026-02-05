@@ -1,0 +1,17 @@
+A_111110011;            (((- tok1 -)))
+A_+*+*+*+*+ ;           (((- tok1 -)))
+B_-12*1132*1244+-4 ;    --- tok2
+A_00000;                (((- tok1 -)))
+B_-6$-4$-2*0$2$4;       (((- tok2 -)))
+
+%%%%%%                  --- division between header and run sections
+
+START BATTERY 60.0 kWh - FUEL 10.0 PLUS 10.0 liters ;       (((- battery=60.0 fuel=20.0 -)))
+
+MOD BATTERY MAX(2.0, 3.0, 1.0) PLUS 7.0 ;
+
+MOD FUEL MAX(3.0 PLUS 2.0 STAR 2.0, 3.0 STAR 2.0, MAX(1.0, 3.0, 10.0));
+
+MOD BATTERY MAX(2.0, 3.0, 1.0) PLUS 7.0 ;
+
+MOD BATTERY MAX(2.0, 3.0, 1.0) PLUS 7.0 ;

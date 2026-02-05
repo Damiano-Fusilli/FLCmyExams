@@ -1,0 +1,102 @@
+import java_cup.runtime.*;
+import java.util.*;
+import java.io.*;
+
+
+init with{:
+    table = new HashMap <String, HashMap <String, Double>>();
+:};
+
+parser code {:
+    public HashMap <String, HashMap <String, Double>> table;
+
+    public Object stack(int position){
+        return (((Symbol)stack.elementAt(tos + position)).value);
+    }
+:};
+
+
+terminal SEP, TOK1, TOK2, SC, START, BATTERY, FUEL, KWH, LITERS, MINUS, USE, DO, DONE, PLUS, MAX, STAR, MOD, KM, UNITS_KM, COMMA, RO, RC;
+terminal String QSTRING;
+terminal Float FLOAT;
+
+//terminal Double DOUBLE;
+
+
+non terminal prog;
+non terminal header, tok1_list;
+non terminal Object[] run;
+non terminal Object[] command_list, command, NT0;
+non terminal Float battery_ass, fuel_ass, expr, expr_list;
+// non terminal String ;
+// non terminal HashMap ;
+// non terminal Integer ;
+// non terminal Double;
+// non terminal Boolean ;
+
+
+//precedences and associativities
+// precedence left OR;
+// precedence left AND;
+// precedence left NOT;
+// precedence left LT, GT, LE, GE, EQ, NEQ;
+// precedence left PLUS, MINUS;
+// precedence left STAR, DIV;
+
+precedence left STAR, PLUS;
+/////////////////////////////
+//// Grammar
+////////////////////////////
+
+start with prog;
+
+prog ::= header SEP run
+;
+
+header ::= tok1_list | tok1_list TOK2 SC tok1_list TOK2 SC tok1_list | tok1_list TOK2 SC tok1_list TOK2 SC tok1_list TOK2 SC tok1_list
+;
+
+tok1_list ::= tok1_list TOK1 SC| 
+;
+
+run ::= START battery_ass:x MINUS fuel_ass:y SC {:System.out.println("battery:" + x + ", fuel:" + y); RESULT = new Object[2]; RESULT[0] = x; RESULT[1] = y; :} command_list
+;
+
+//command_list
+
+battery_ass ::= BATTERY expr:x KWH {:RESULT = (Float) x; :} | {: RESULT = 100.0f; :}
+;
+
+fuel_ass ::= FUEL expr:x LITERS {:RESULT = (Float) x; :} | {: RESULT = 100.0f; :}
+;
+
+expr ::= expr:x PLUS expr:y {:RESULT = x + y; :} 
+    | expr:x STAR expr:y {:RESULT = x * y; :} 
+    | FLOAT:x {:RESULT = x; :}
+    | MAX RO expr_list:x RC {:RESULT = x; :}
+;
+
+expr_list ::= expr_list:x COMMA expr:y {:
+        if (x > y) {RESULT = x;} 
+        else { RESULT = y;}
+    :} | expr:x {:RESULT = x; :}
+;
+
+command_list ::= command_list command command | command command command command
+;
+
+command ::= NT0:pair MOD BATTERY expr:x SC {:
+    RESULT = new Object[2];
+    RESULT[0] = x+(Float)pair[0];
+    RESULT[1] = pair[1];
+    System.out.println("battery:" + RESULT[0] + ", fuel:" + RESULT[1]);
+  :} | NT0:pair MOD FUEL expr:x SC {:
+    RESULT = new Object[2];
+    RESULT[0] = pair[0];
+    RESULT[1] = (Float)pair[1]+x;
+    System.out.println("battery:" + RESULT[0] + ", fuel:" + RESULT[1]);
+  :}
+;
+
+NT0 ::= {: RESULT = (Object[])parser.stack(0); :};
+
