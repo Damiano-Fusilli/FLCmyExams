@@ -1,0 +1,118 @@
+import java_cup.runtime.*;
+import java.util.*;
+import java.io.*;
+
+
+init with{:
+    table = new HashMap <String, Boolean>();
+:};
+
+parser code {:
+    public HashMap <String, Boolean> table;
+
+    public Object stack(int position){
+        return (((Symbol)stack.elementAt(tos + position)).value);
+    }
+:};
+
+
+terminal SEP, TOK1, TOK2, TOK3, SC, EQ, RO, RC, AND, OR, NOT;
+terminal String QSTRING, IF, FI, DO, DONE, PRINT, VAR, ANDs, ORs;
+terminal Integer UINT;
+terminal Boolen TRUE,FALSE;
+
+//terminal Float FLOAT;
+//terminal Double DOUBLE;
+
+
+non terminal prog;
+non terminal header, tok2_list, tok1_2_list, tok1_3, tok1_3_list;
+non terminal execution, command, ass, if;
+non terminal Boolean NT0,NT1, bool_exp, bool_exp1, comp, comp1, list_comp;
+// non terminal String ;
+// non terminal HashMap ;
+// non terminal Integer ;
+// non terminal Double;
+// non terminal Boolean ;
+
+
+//precedences and associativities
+precedence left OR;
+precedence left AND;
+precedence left NOT;
+// precedence left LT, GT, LE, GE, EQ, NEQ;
+// precedence left PLUS, MINUS;
+// precedence left STAR, DIV;
+
+
+/////////////////////////////
+//// Grammar
+////////////////////////////
+
+start with prog;
+
+prog ::= header SEP execution
+;
+
+header ::= tok2_list tok1_3_list | TOK3 tok1_2_list TOK3 tok1_2_list TOK3 tok1_2_list
+;
+
+tok2_list ::=  tok2_list TOK2 SC TOK2 SC | TOK2 SC TOK2 SC TOK2 SC 
+;
+
+tok1_3_list ::= tok1_3 SC tok1_3 SC |
+            tok1_3 SC tok1_3 SC tok1_3 SC |
+            tok1_3 SC tok1_3 SC tok1_3 SC tok1_3 SC tok1_3 SC tok1_3 SC tok1_3 SC tok1_3 SC tok1_3 SC
+;
+
+tok1_3 ::= TOK1 | TOK3
+;
+
+tok1_2_list ::= TOK1 SC | TOK2 SC |
+;
+
+
+execution ::= command command command command command | execution command command
+;
+
+command ::= ass SC | if 
+;
+
+ass ::= VAR:key EQ bool_exp:value {: parser.table.put(new String(key), new Boolean( value)); :}
+;
+
+bool_exp ::= TRUE {: RESULT = true; :} | FALSE {: RESULT = false; :} |
+            bool_exp:x AND bool_exp:y {: RESULT = x && y; :} |
+            bool_exp:x OR bool_exp:y  {: RESULT = x || y; :} |
+            NOT bool_exp:x     {: RESULT = !x; :} |
+            RO bool_exp:x RC {:RESULT = x; :} |
+            VAR:key {:RESULT = new Boolean(parser.table.get(key)); :}
+;
+
+if ::= IF bool_exp list_comp FI 
+;
+
+
+list_comp ::= list_comp comp:x {: RESULT=x; :} | comp:x {: RESULT=x; :}
+;
+
+comp ::= NT0:x ORs bool_exp:y DO PRINT QSTRING:s SC DONE{:
+        if(x || y){
+            System.out.println(new String(s));
+        }
+        RESULT = new Boolean(x);
+    :} | NT0:x ANDs bool_exp:y DO PRINT QSTRING:s SC DONE {:
+        if(x && y){
+            System.out.println(new String(s));
+        }
+        RESULT = new Boolean(x);
+    :}
+;
+
+
+NT0 ::= {: RESULT = (Boolean) parser.stack(0); :}
+;
+
+
+
+
