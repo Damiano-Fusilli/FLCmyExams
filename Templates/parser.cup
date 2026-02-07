@@ -62,3 +62,13 @@ bool_exp ::= TRUE {: RESULT = true; :} | FALSE {: RESULT = false; :} |
             RO bool_exp:x RC {:RESULT = x; :} |
             VAR:key {:RESULT = new Boolean(parser.table.get(key)); :}
 */
+
+/*
+expr ::= expr:x STAR expr:y {: RESULT = x*y; :} | 
+        expr:x DIV expr:y {: RESULT = x/y; :} | 
+        expr:x PLUS expr:y {: RESULT = x+y; :} | 
+        expr:x MINUS expr:y {: RESULT = x-y; :} | 
+        RO expr:x RC {: RESULT = x; :}  |
+        UREAL:x {: RESULT=x; :}
+;
+*/

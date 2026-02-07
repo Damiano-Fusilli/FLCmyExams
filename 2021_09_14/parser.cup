@@ -1,0 +1,128 @@
+import java_cup.runtime.*;
+import java.util.*;
+import java.io.*;
+
+
+init with{:
+    height = new Integer(0);
+    speed = new Integer(0);
+:};
+
+parser code {:
+    public Integer height;
+    public Integer speed;
+
+    public Object stack(int position){
+        return (((Symbol)stack.elementAt(tos + position)).value);
+    }
+:};
+
+
+terminal SEP, TOK1, TOK2, TOK3, SC, COMMA, BO, BC, EQ, EQEQ, GT,INIT,HEIGHT, SPEED,SUM,MUL,COND,UPDATE,DONE;
+terminal String QSTRING;
+terminal Integer UINT;
+
+
+//terminal Float FLOAT;
+//terminal Double DOUBLE;
+
+
+non terminal prog;
+non terminal header, tok1_2_list ;
+non terminal simulation_, init_, command_list, command, height_ass, speed_ass, ass, cond_;
+
+non terminal Integer exp;
+non terminal Boolean NT0, NT1, ass_list, comparison;
+// non terminal String ;
+// non terminal HashMap ;
+// non terminal Integer ;
+// non terminal Double;
+// non terminal Boolean ;
+
+
+//precedences and associativities
+// precedence left OR;
+// precedence left AND;
+// precedence left NOT;
+// precedence left LT, GT, LE, GE, EQ, NEQ;
+// precedence left PLUS, MINUS;
+// precedence left STAR, DIV;
+precedence left SUM;
+precedence left MUL;
+
+
+/////////////////////////////
+//// Grammar
+////////////////////////////
+
+start with prog;
+
+prog ::= header SEP simulation_
+;
+
+header ::= tok1_2_list TOK3 SC tok1_2_list TOK3 SC tok1_2_list |
+        tok1_2_list TOK3 SC tok1_2_list |
+        tok1_2_list
+;
+
+tok1_2_list ::= tok1_2_list TOK1 SC | tok1_2_list TOK2 SC | 
+;
+
+simulation_ ::= init_ command_list
+;
+
+
+init_ ::= INIT NT1 height_ass COMMA NT1 speed_ass SC |
+    INIT NT1 speed_ass COMMA NT1 height_ass SC |
+    INIT NT1 speed_ass COMMA  SC |
+    INIT  NT1 height_ass COMMA  SC |
+    INIT COMMA NT1 height_ass SC |
+    INIT COMMA  NT1 speed_ass SC
+;
+
+height_ass ::= HEIGHT EQ exp:x {: if((Boolean)parser.stack(-3)){
+         parser.height = (Integer) x;
+         System.out.println("HEIGHT: "+x);
+      } :} 
+;
+
+speed_ass ::=  SPEED EQ exp:x {: if((Boolean)parser.stack(-3)){
+         parser.speed = (Integer) x;
+         System.out.println("SPEED: "+x);
+      } :} 
+;
+
+exp ::= exp:x MUL exp:y {: RESULT=x*y; :} |
+    exp:x SUM exp:y {: RESULT = x+y; :} |
+    UINT:x {: RESULT=x; :} |
+    HEIGHT {: RESULT= parser.height; :} |
+    SPEED {: RESULT= parser.speed; :}
+;
+
+
+command_list ::= command_list command command | command command  command 
+;
+
+command ::= NT1 height_ass SC | NT1 speed_ass SC | cond_ SC 
+;
+
+cond_ ::= COND BO comparison:bool BC UPDATE ass_list DONE
+;
+
+comparison ::= exp:x GT exp:y {: RESULT = x > y; :} |
+            exp:x EQEQ exp:y {: RESULT = x.equals(y); :} |
+            {: RESULT = true; :}
+;
+
+ass_list ::= ass_list:bool ass SC {: RESULT=bool; :} | NT0:bool ass SC {: RESULT= bool; :}
+;
+
+NT0 ::= {: RESULT = (Boolean) parser.stack(-2); :}
+;
+
+NT1 ::= {: RESULT = true; :}
+;
+
+
+ass ::= height_ass | speed_ass
+;

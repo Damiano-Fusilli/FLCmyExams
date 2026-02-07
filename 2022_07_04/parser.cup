@@ -19,7 +19,7 @@ parser code {:
 terminal SEP, TOK1, TOK2, TOK3, SC, EQ, RO, RC, AND, OR, NOT;
 terminal String QSTRING, IF, FI, DO, DONE, PRINT, VAR, ANDs, ORs;
 terminal Integer UINT;
-terminal Boolen TRUE,FALSE;
+terminal Boolean TRUE,FALSE;
 
 //terminal Float FLOAT;
 //terminal Double DOUBLE;

@@ -1,0 +1,106 @@
+import java_cup.runtime.*;
+import java.util.*;
+import java.io.*;
+
+
+init with{:
+    table = new HashMap <String, HashMap <String, Double>>();
+:};
+
+parser code {:
+    public HashMap <String, HashMap <String, Double>> table;
+
+    public Object stack(int position){
+        return (((Symbol)stack.elementAt(tos + position)).value);
+    }
+:};
+
+
+terminal SEP, TOK1, TOK2, SC, CO,COMMA,PLUS,MINUS,STAR,DIV,RO,RC;
+terminal String QSTRING, POINTS;
+terminal Double LOW,MEDIUM,HIGH,UREAL;
+
+
+//terminal Float FLOAT;
+//terminal Double DOUBLE;
+
+
+non terminal prog;
+non terminal header, tok2_list, tok2_list_v2 ;
+non terminal athletes, athlete;
+non terminal HashMap attr_list;
+non terminal Double expr;
+non terminal Integer NT0;
+// non terminal String ;
+// non terminal HashMap ;
+// non terminal Integer ;
+// non terminal Double;
+// non terminal Boolean ;
+
+
+//precedences and associativities
+// precedence left OR;
+// precedence left AND;
+// precedence left NOT;
+// precedence left LT, GT, LE, GE, EQ, NEQ;
+ precedence left PLUS, MINUS;
+ precedence left STAR, DIV;
+
+
+/////////////////////////////
+//// Grammar
+////////////////////////////
+
+start with prog;
+
+prog ::= header SEP athletes SEP
+;
+
+header ::= TOK1 SC tok2_list TOK1 SC tok2_list TOK1 SC tok2_list| 
+        tok2_list_v2 TOK1 SC TOK1 SC TOK1 SC TOK1 SC |
+        tok2_list_v2 TOK1 SC TOK1 SC TOK1 SC TOK1 SC TOK1 SC TOK1 SC TOK1 SC TOK1 SC TOK1 SC TOK1 SC TOK1 SC TOK1 SC TOK1 SC
+;
+
+tok2_list ::= tok2_list TOK2 SC |
+;
+
+tok2_list_v2 ::= tok2_list_v2 TOK2 SC TOK2 SC | TOK2 SC TOK2 SC TOK2 SC TOK2 SC 
+;
+
+athletes ::= athletes athlete SC athlete SC | athlete SC athlete SC athlete SC 
+;
+
+athlete::= QSTRING:name CO attr_list:tab {:
+        parser.table.put(name,tab);
+    :}
+;
+
+attr_list ::= attr_list:tab COMMA QSTRING:attr expr:x   {:
+        tab.put(attr,x);
+        RESULT = tab;
+    :}
+        | QSTRING:attr expr:x  {:
+        HashMap <String, Double> athlete = new HashMap <String,Double>();
+        athlete.put(attr,x);
+        RESULT = athlete; 
+    :}
+;
+
+expr ::= expr:x STAR expr:y {: RESULT = x*y; :} | 
+        expr:x DIV expr:y {: RESULT = x/y; :} | 
+        expr:x PLUS expr:y {: RESULT = x+y; :} | 
+        expr:x MINUS expr:y {: RESULT = x-y; :} | 
+        RO expr:x RC {: RESULT = x; :}  |
+        UREAL:x {: RESULT=x; :}
+;
+
+
+// HANDLE IF CONDITIONS, REMEMBER PRECEDENCES 
+/*
+bool_exp ::= TRUE {: RESULT = true; :} | FALSE {: RESULT = false; :} |
+            bool_exp:x AND bool_exp:y {: RESULT = x && y; :} |
+            bool_exp:x OR bool_exp:y  {: RESULT = x || y; :} |
+            NOT bool_exp:x     {: RESULT = !x; :} |
+            RO bool_exp:x RC {:RESULT = x; :} |
+            VAR:key {:RESULT = new Boolean(parser.table.get(key)); :}
+*/
